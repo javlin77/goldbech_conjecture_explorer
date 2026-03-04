@@ -6,56 +6,92 @@ The project demonstrates how every tested even integer greater than 2 can be exp
 
 ---
 
-# The Goldbach Conjecture
+## Mathematical Foundation
 
-The conjecture states:
+The **Goldbach Conjecture** is one of the oldest unsolved problems in number theory. It proposes that every even integer greater than 2 can be expressed as the sum of two prime numbers.
 
-> Every even integer greater than 2 can be expressed as the sum of two prime numbers.
+### Formal Statement
 
-Formally:
-
-[
-\forall n \in \mathbb{Z}, \quad n > 2,\ n \text{ even} \Rightarrow \exists\ p_1, p_2 \text{ primes such that } n = p_1 + p_2
-]
-
-Example:
+For every integer (n):
 
 ```
-100 = 47 + 53
-28  = 11 + 17
-4   = 2 + 2
+∀ n ∈ ℤ
+n > 2
+n is even
+```
+
+there exist two prime numbers (p₁) and (p₂) such that
+
+```
+p₁ + p₂ = n
 ```
 
 ---
 
-# Core Mathematical Intuitions
+### Visual Interpretation
 
-## 1. Even numbers as multiples of two
+For an even number (n):
 
-Every even number can be written as
-
-[
-n = 2k
-]
-
-If a prime number is (p), then
-
-[
-2p = p + p
-]
+```
+      p₁        p₂
+       │        │
+       ▼        ▼
+     prime + prime
+          │
+          ▼
+           n
+```
 
 Example:
 
 ```
-2 × 5 = 10
+47 + 53 = 100
+```
+
+Both **47** and **53** are prime numbers whose sum produces the even integer **100**.
+
+---
+
+### Example Decompositions
+
+```
+4   = 2 + 2
+6   = 3 + 3
+8   = 3 + 5
+10  = 5 + 5
+28  = 11 + 17
+100 = 47 + 53
+```
+
+---
+
+### Core Intuitions
+
+Two simple observations motivate why this conjecture appears plausible:
+
+#### 1. Every even number is a multiple of two
+
+```
+n = 2k
+```
+
+If (p) is a prime number:
+
+```
+2p = p + p
+```
+
+Example:
+
+```
 10 = 5 + 5
 ```
 
-So **even numbers that are twice a prime already satisfy the conjecture trivially.**
+So even numbers that are twice a prime automatically satisfy the conjecture.
 
 ---
 
-## 2. All primes except 2 are odd
+#### 2. All primes except 2 are odd
 
 Prime numbers:
 
@@ -63,25 +99,65 @@ Prime numbers:
 2, 3, 5, 7, 11, 13, ...
 ```
 
-Except for **2**, every prime is odd.
+Except for **2**, every prime number is odd.
 
-Therefore:
+Since
 
 ```
 odd + odd = even
 ```
 
+two odd primes naturally combine to produce an even number.
+
 Example:
 
 ```
-3 + 5 = 8
+3 + 5  = 8
 11 + 17 = 28
 47 + 53 = 100
 ```
 
-This means **two odd primes naturally produce an even number**, making Goldbach decompositions possible.
+---
+
+### Algorithmic Insight Used in This Project
+
+Instead of scanning from small primes upward, this project uses a **symmetric center-expansion search**.
+
+For an even number (n):
+
+```
+node1 = n / 2
+node2 = n / 2
+```
+
+Then expand outward symmetrically:
+
+```
+node1 ↓        node2 ↑
+49 + 51
+47 + 53   ← primes found
+```
+
+Formally, the search explores pairs of the form:
+
+```
+n/2 ± 1
+n/2 ± 3
+n/2 ± 5
+...
+```
+
+until both numbers are prime.
+
+This approach often finds valid decompositions quickly, especially for large values of (n).
 
 ---
+
+### Disclaimer
+
+This project **does not prove the Goldbach Conjecture**.
+It only verifies the conjecture computationally for the tested values.
+
 
 # Algorithmic Idea
 
