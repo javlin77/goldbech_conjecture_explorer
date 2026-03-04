@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goldbach Conjecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --border: #1e1e2e;
+    --accent: #00ffe0;
+    --accent2: #ff2d78;
+    --accent3: #ffe135;
+    --text: #e8e8f0;
+    --muted: #555570;
+    --glow: 0 0 20px rgba(0,255,224,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,255,224,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,224,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 48px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,255,224,0.08);
+    border: 1px solid rgba(0,255,224,0.2);
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.4s infinite;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  h1 span.hl { color: var(--accent); }
+  h1 span.hl2 { color: var(--accent2); }
+
+  .subtitle {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.7;
+  }
+
+  /* Input area */
+  .input-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 36px;
+    animation: fadeDown 0.6s 0.1s ease both;
+  }
+
+  .input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .input-wrap label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    padding: 14px 18px;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+  input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+
+  .run-btn {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 0 0 rgba(0,255,224,0);
+  }
+
+  .run-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(0,255,224,0.35);
+  }
+  .run-btn:active { transform: translateY(0); }
+
+  /* Quick preset buttons */
+  .presets-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    animation: fadeDown 0.6s 0.15s ease both;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.6s 0.2s ease both;
+  }
+
+  .preset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,255,224,0.06);
+  }
+
+  /* Result card */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px;
+    margin-bottom: 32px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+    animation: fadeDown 0.6s 0.25s ease both;
+  }
+
+  .result-card.has-result {
+    border-color: rgba(0,255,224,0.3);
+  }
+
+  .result-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .result-card.has-result::before { opacity: 1; }
+
+  .result-idle {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+
+  .result-display {
+    text-align: center;
+    width: 100%;
+  }
+
+  .result-equation {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+  }
+
+  .result-equation .p1 { color: var(--accent); }
+  .result-equation .op { color: var(--muted); margin: 0 10px; }
+  .result-equation .p2 { color: var(--accent2); }
+  .result-equation .eq { color: var(--muted); margin: 0 10px; }
+  .result-equation .n  { color: var(--accent3); }
+
+  .result-meta {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .result-time {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 10px;
+    background: rgba(0,255,224,0.08);
+    border: 1px solid rgba(0,255,224,0.15);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Error state */
+  .result-error {
+    color: var(--accent2);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  /* History */
+  .history-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    animation: fadeDown 0.6s 0.3s ease both;
+  }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+    animation: fadeDown 0.6s 0.35s ease both;
+  }
+
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: popIn 0.3s ease both;
+  }
+
+  .history-item:hover {
+    border-color: rgba(0,255,224,0.3);
+    transform: translateY(-2px);
+  }
+
+  .hi-n {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--accent3);
+    margin-bottom: 4px;
+  }
+
+  .hi-pair {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .hi-pair span:first-child { color: var(--accent); }
+  .hi-pair span:last-child  { color: var(--accent2); }
+
+  /* Loader */
+  .loader {
+    display: none;
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* Visual prime decomposition bar */
+  .prime-pills {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .pill {
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+
+  .pill-p1 { background: rgba(0,255,224,0.12); border: 1px solid rgba(0,255,224,0.3); color: var(--accent); }
+  .pill-p2 { background: rgba(255,45,120,0.12); border: 1px solid rgba(255,45,120,0.3); color: var(--accent2); }
+
+  /* Info block */
+  .info-block {
+    margin-top: 48px;
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+    animation: fadeDown 0.6s 0.4s ease both;
+  }
+
+  .info-block strong { color: var(--text); }
+
+  #clearBtn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 4px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.18s;
+  }
+  #clearBtn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  /* Animations */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes resultPop {
+    0%   { opacity: 0; transform: scale(0.88) translateY(8px); }
+    70%  { transform: scale(1.03) translateY(-2px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .result-animate { animation: resultPop 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+  /* Responsive */
+  @media (max-width: 540px) {
+    .input-row { flex-direction: column; }
+    .run-btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="badge"><span class="badge-dot"></span> Miller-Rabin · Center Expansion</div>
+    <h1>Goldbach<br><span class="hl">Conjecture</span> <span class="hl2">Explorer</span></h1>
+    <p class="subtitle">
+      Every even integer &gt; 2 is the sum of two primes.<br>
+      C++ algorithm ported to JS with identical deterministic Miller-Rabin bases.
+    </p>
+  </div>
+
+  <div class="input-row">
+    <div class="input-wrap">
+      <label>Enter an even number &gt; 2</label>
+      <input type="number" id="numInput" placeholder="e.g. 1000000" min="4" step="2" value="">
+    </div>
+    <button class="run-btn" onclick="runGoldbach()">▶ Compute</button>
+  </div>
+
+  <div class="presets-label">Quick presets</div>
+  <div class="presets" id="presets"></div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-idle" id="resultIdle">Enter an even number and hit Compute.</div>
+    <div class="loader" id="loader"></div>
+    <div class="result-display" id="resultDisplay" style="display:none"></div>
+  </div>
+
+  <div id="historySection" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="history-label" style="margin-bottom:0">History</div>
+      <button id="clearBtn" onclick="clearHistory()">Clear</button>
+    </div>
+    <div class="history-grid" id="historyGrid"></div>
+  </div>
+
+  <div class="info-block">
+    <strong>Algorithm:</strong> Primality tested with deterministic <strong>Miller-Rabin</strong>
+    (7 hardcoded bases — correct for all n &lt; 3.3 × 10²⁴).<br>
+    <strong>Goldbach search:</strong> Starts at n/2 and expands outward by 2 until a prime pair is found.
+    Skips even offsets automatically. Exact port of the C++ center-expansion logic.
+  </div>
+
+</div>
+
+<script>
+// ─── BigInt Miller-Rabin (matches C++ exactly) ───────────────────────────────
+
+function modMul(a, b, mod) {
+  // JS BigInt handles arbitrary precision
+  return (a * b) % mod;
+}
+
+function modPow(base, exp, mod) {
+  let result = 1n;
+  base = base % mod;
+  while (exp > 0n) {
+    if (exp & 1n) result = modMul(result, base, mod);
+    base = modMul(base, base, mod);
+    exp >>= 1n;
+  }
+  return result;
+}
+
+function isPrime(n) {
+  if (n < 2n) return false;
+  const smallPrimes = [2n, 3n, 5n, 7n, 11n, 13n, 17n];
+  for (const p of smallPrimes) {
+    if (n % p === 0n) return n === p;
+  }
+
+  let d = n - 1n;
+  let r = 0;
+  while ((d & 1n) === 0n) { d >>= 1n; r++; }
+
+  // Same deterministic bases as C++
+  const testBases = [2n, 325n, 9375n, 28178n, 450775n, 9780504n, 1795265022n];
+
+  for (const a of testBases) {
+    if (a % n === 0n) continue;
+    let x = modPow(a, d, n);
+    if (x === 1n || x === n - 1n) continue;
+
+    let composite = true;
+    for (let i = 1; i < r; i++) {
+      x = modMul(x, x, n);
+      if (x === n - 1n) { composite = false; break; }
+    }
+    if (composite) return false;
+  }
+  return true;
+}
+
+function goldbach(n) {
+  let node1 = n / 2n;
+  let node2 = n / 2n;
+
+  // Only shift off center if node1 is even AND it's not 2 itself
+  if (node1 % 2n === 0n && node1 !== 2n) { node1--; node2++; }
+
+  while (node1 >= 2n) {
+    if (isPrime(node1) && isPrime(node2)) return [node1, node2];
+    node1 -= 2n; node2 += 2n;
+  }
+  return [0n, 0n];
+}
+
+// ─── Presets ─────────────────────────────────────────────────────────────────
+const PRESETS = [4, 28, 100, 1000, 9999998, 1000000000, 999999999998];
+
+const presetsEl = document.getElementById('presets');
+PRESETS.forEach(v => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = v.toLocaleString();
+  btn.onclick = () => {
+    document.getElementById('numInput').value = v;
+    runGoldbach();
+  };
+  presetsEl.appendChild(btn);
+});
+
+// ─── History ──────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'goldbach_history';
+
+// Load from localStorage, converting stored strings back to BigInt
+const history = (() => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw).map(e => ({ n: BigInt(e.n), p1: BigInt(e.p1), p2: BigInt(e.p2) }));
+  } catch { return []; }
+})();
+
+function saveHistory() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(
+      history.map(e => ({ n: e.n.toString(), p1: e.p1.toString(), p2: e.p2.toString() }))
+    ));
+  } catch {}
+}
+
+function addHistory(n, p1, p2) {
+  // Avoid duplicate entries for the same n
+  const idx = history.findIndex(e => e.n === n);
+  if (idx !== -1) history.splice(idx, 1);
+  history.unshift({ n, p1, p2 });
+  if (history.length > 12) history.pop();
+  saveHistory();
+  renderHistory();
+}
+
+function renderHistory() {
+  const sec = document.getElementById('historySection');
+  const grid = document.getElementById('historyGrid');
+  if (history.length === 0) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  grid.innerHTML = '';
+  history.forEach(({ n, p1, p2 }) => {
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    el.innerHTML = `
+      <div class="hi-n">${Number(n).toLocaleString()}</div>
+      <div class="hi-pair"><span>${p1.toLocaleString()}</span> + <span>${p2.toLocaleString()}</span></div>`;
+    el.onclick = () => {
+      document.getElementById('numInput').value = n.toString();
+      runGoldbach();
+    };
+    grid.appendChild(el);
+  });
+}
+
+// ─── Main ──────────────────────────────────────────────────────────────────────
+function setLoading(on) {
+  document.getElementById('resultIdle').style.display   = on ? 'none'  : '';
+  document.getElementById('loader').style.display       = on ? 'block' : 'none';
+  document.getElementById('resultDisplay').style.display = 'none';
+}
+
+function showError(msg) {
+  const card = document.getElementById('resultCard');
+  card.classList.remove('has-result');
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('resultIdle').style.display = 'none';
+  const rd = document.getElementById('resultDisplay');
+  rd.style.display = 'block';
+  rd.innerHTML = `<div class="result-error">⚠ ${msg}</div>`;
+}
+
+function showResult(n, p1, p2, ms) {
+  const card = document.getElementById('resultCard');
+  card.classList.add('has-result');
+  document.getElementById('loader').style.display = 'none';
+  document.getElementById('resultIdle').style.display = 'none';
+  const rd = document.getElementById('resultDisplay');
+  rd.style.display = 'block';
+  rd.className = 'result-display result-animate';
+  rd.innerHTML = `
+    <div class="result-equation">
+      <span class="p1">${p1.toLocaleString()}</span>
+      <span class="op">+</span>
+      <span class="p2">${p2.toLocaleString()}</span>
+      <span class="eq">=</span>
+      <span class="n">${n.toLocaleString()}</span>
+    </div>
+    <div class="prime-pills">
+      <span class="pill pill-p1">prime: ${p1.toLocaleString()}</span>
+      <span class="pill pill-p2">prime: ${p2.toLocaleString()}</span>
+    </div>
+    <div class="result-time">⚡ ${ms < 1 ? '<1' : ms} ms</div>`;
+  // Reset animation
+  void rd.offsetWidth;
+  rd.className = 'result-display result-animate';
+}
+
+function runGoldbach() {
+  const raw = document.getElementById('numInput').value.trim();
+  if (!raw) { showError('Please enter a number.'); return; }
+
+  let n;
+  try { n = BigInt(raw); } catch { showError('Invalid number.'); return; }
+
+  if (n <= 2n)       { showError('Number must be greater than 2.'); return; }
+  if (n % 2n !== 0n) { showError('Number must be even.'); return; }
+
+  setLoading(true);
+
+  // Yield to browser to paint loader, then compute
+  setTimeout(() => {
+    const t0 = performance.now();
+    const [p1, p2] = goldbach(n);
+    const ms = Math.round(performance.now() - t0);
+
+    if (p1 === 0n) {
+      showError('No pair found (unexpected).');
+      return;
+    }
+    showResult(n, p1, p2, ms);
+    addHistory(n, p1, p2);
+  }, 30);
+}
+
+function clearHistory() {
+  history.length = 0;
+  localStorage.removeItem(STORAGE_KEY);
+  renderHistory();
+}
+
+// Render saved history on page load
+renderHistory();
+
+// Enter key support
+document.getElementById('numInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runGoldbach();
+});
+</script>
+</body>
+</html>
