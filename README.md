@@ -159,49 +159,6 @@ This project **does not prove the Goldbach Conjecture**.
 It only verifies the conjecture computationally for the tested values.
 
 
-# Algorithmic Idea
-
-Instead of searching from the beginning of the number line, the algorithm starts from the **center of the number**.
-
-For an even number (n):
-
-[
-node_1 = \frac{n}{2}, \quad node_2 = \frac{n}{2}
-]
-
-Then the algorithm expands outward symmetrically.
-
-If the center is even (and not 2):
-
-```
-node1 = node1 - 1
-node2 = node2 + 1
-```
-
-Then iterate:
-
-[
-node_1 = node_1 - 2
-]
-[
-node_2 = node_2 + 2
-]
-
-At each step we test:
-
-[
-isPrime(node_1) \land isPrime(node_2)
-]
-
-When both are prime:
-
-[
-n = node_1 + node_2
-]
-
-The search stops.
-
----
 
 # Why Start From the Center?
 
